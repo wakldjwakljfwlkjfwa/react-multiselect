@@ -1,23 +1,60 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Select from "react-select";
+import { useEffect, useState } from "react";
 
 function App() {
+  const options = Array.from(Array(10)).map((_, index) => ({
+    value: `item ${index}`,
+    label: `item ${index}`,
+  }));
+
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [shouldFetchData, setShouldFetchData] = useState(false);
+  const [fetchedData, setFetchedData] = useState([]);
+
+  const fetchData = () => {
+    // Make http requests here
+    console.log(selectedItems);
+    setTimeout(() => {
+      setFetchedData(selectedItems);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    if (shouldFetchData) fetchData();
+    setShouldFetchData(false);
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div
+      style={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#ccc",
+      }}
+    >
+      <div>request: {fetchedData.join(", ")}</div>
+      <Select
+        options={options}
+        isMulti
+        closeMenuOnSelect={false}
+        onMenuClose={() => {
+          // Fetch data when the options list is closed
+          fetchData();
+        }}
+        onChange={(newValue, actionMeta) => {
+          setSelectedItems(newValue.map((e) => e.value));
+
+          // Only fetch data when items are removed
+          setShouldFetchData(
+            actionMeta.action === "clear" ||
+              actionMeta.action === "remove-value"
+          );
+        }}
+      />
     </div>
   );
 }
